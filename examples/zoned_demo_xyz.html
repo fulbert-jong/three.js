@@ -42,10 +42,12 @@
 				const loader = new XYZLoader();
 				loader.load( 'models/xyz/PCL_frame_' + frames + 'fixed_div_by_50_YZflip.xyz', function ( geometry ) {
 					geometry.center();
+					geometry.colors== 0x00ff00;
+					geometry.colorsNeedUpdate=true;
 
 					const vertexColors = ( geometry.hasAttribute( 'color' ) === true );
 
-					const material = new THREE.PointsMaterial( { size: 0.1, vertexColors: vertexColors , Color: 0x8F3304} );
+					const material = new THREE.PointsMaterial( { size: 0.1, vertexColors: false});
 
 					points = new THREE.Points( geometry, material );
 					scene.add( points );
@@ -66,12 +68,12 @@
 				// Controls
 				controls = new OrbitControls( camera, renderer.domElement );
 				controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-				controls.dampingFactor = 0.25;
-				controls.enableZoom = true;
+				controls.dampingFactor = 0.05;
+				// controls.enableZoom = true;
 
 				// controls.screenSpacePanning = false;
-				controls.minDistance = 100;
-				controls.maxDistance = 500;
+				// controls.minDistance = 100;
+				// controls.maxDistance = 500;
 /* 				controls.minDistance = 100;
 				controls.maxDistance = 500;
 
@@ -103,15 +105,19 @@
 				scene.add(backLight);
 
 				document.addEventListener("keypress", function(pressed){
+
 					if (pressed.key == "n"){
 						frames+=1;
 					} else if (pressed.key == "p"){
 						frames-=1;
+					} else if (pressed.key == "c"){
+						points = scene.getObjectByName( 'models/xyz/PCL_frame_' + frames + 'fixed_div_by_50_YZflip.xyz');
+						return;
+					} else{
+						return;
 					}
 					// Clean up and re-adding the light
 					scene.remove.apply(scene, scene.children);
-					scene.add( ambientLight );
-
 					scene.add(keyLight);
 					scene.add(fillLight);
 					scene.add(backLight);
