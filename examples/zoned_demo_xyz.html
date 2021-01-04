@@ -25,6 +25,7 @@
 			let points;
 			let frames=60;
 			let colorhex=0xf09729 ;
+			let oldpoints;
 			init();
 			animate();
 
@@ -39,22 +40,19 @@
 				camera.lookAt( scene.position );
 
 				clock = new THREE.Clock();
-
 				const loader = new XYZLoader();
+				// Load all frames
 				loader.load( 'models/xyz/PCL_frame_' + frames + 'fixed_div_by_50_YZflip.xyz', function ( geometry ) {
-					geometry.center();
+				geometry.center();
 
-					const vertexColors = ( geometry.hasAttribute( 'color' ) === true );
+				const vertexColors = ( geometry.hasAttribute( 'color' ) === true );
 
-					const material = new THREE.PointsMaterial( { size: 0.1, vertexColors: false, color: colorhex });
+				const material = new THREE.PointsMaterial( { size: 0.1, vertexColors: false, color: colorhex });
 
-					points = new THREE.Points( geometry, material );
-					scene.add( points );
-
-				} );
-
-				//
-
+				points = new THREE.Points( geometry, material );
+				points.name=frames;
+				scene.add( points );
+				});
 				renderer = new THREE.WebGLRenderer();
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
@@ -106,15 +104,37 @@
 				document.addEventListener("keypress", function(pressed){
 
 					if (pressed.key == "n"){
+						oldpoints = scene.getObjectByName( frames );
 						frames+=1;
+						points = scene.getObjectByName( frames );
+						points.visible=true;
+						olpoints.visible=false;
+						console.log(frames)
+						return;
 					} else if (pressed.key == "p"){
+						oldpoints = scene.getObjectByName( frames );
 						frames-=1;
+						points = scene.getObjectByName( frames );
+						points.visible=true;
+						olpoints.visible=false;
+						console.log(frames)
+						return;
+					} else if (pressed.key == "h"){
+						points = scene.getObjectByName( frames );
+						points.visible=false;
+						return;
+					} else if (pressed.key == "u"){
+						points = scene.getObjectByName( frames );
+						points.visible=true;
+						return;
 					} else if (pressed.key == "c"){
 						points = scene.getObjectByName( 'models/xyz/PCL_frame_' + frames + 'fixed_div_by_50_YZflip.xyz');
+						points.visible=false;
 						return;
 					} else{
 						return;
 					}
+
 					// Clean up and re-adding the light
 					scene.remove.apply(scene, scene.children);
 					// scene.add(keyLight);
