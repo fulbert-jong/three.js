@@ -24,6 +24,7 @@
 
 			let points;
 			let frames=60;
+			let colorhex=0xf09729 ;
 			init();
 			animate();
 
@@ -42,12 +43,10 @@
 				const loader = new XYZLoader();
 				loader.load( 'models/xyz/PCL_frame_' + frames + 'fixed_div_by_50_YZflip.xyz', function ( geometry ) {
 					geometry.center();
-					geometry.colors== 0x00ff00;
-					geometry.colorsNeedUpdate=true;
 
 					const vertexColors = ( geometry.hasAttribute( 'color' ) === true );
 
-					const material = new THREE.PointsMaterial( { size: 0.1, vertexColors: false});
+					const material = new THREE.PointsMaterial( { size: 0.1, vertexColors: false, color: colorhex });
 
 					points = new THREE.Points( geometry, material );
 					scene.add( points );
@@ -68,7 +67,7 @@
 				// Controls
 				controls = new OrbitControls( camera, renderer.domElement );
 				controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
-				controls.dampingFactor = 0.05;
+				controls.dampingFactor = 0.1;
 				// controls.enableZoom = true;
 
 				// controls.screenSpacePanning = false;
@@ -118,16 +117,15 @@
 					}
 					// Clean up and re-adding the light
 					scene.remove.apply(scene, scene.children);
-					scene.add(keyLight);
-					scene.add(fillLight);
-					scene.add(backLight);
+					// scene.add(keyLight);
+					// scene.add(fillLight);
+					// scene.add(backLight);
 					loader.load( 'models/xyz/PCL_frame_' + frames + 'fixed_div_by_50_YZflip.xyz', function ( geometry ) {
 
 						geometry.center();
-
 						const vertexColors = ( geometry.hasAttribute( 'color' ) === true );
 
-						const material = new THREE.PointsMaterial( { size: 0.1, vertexColors: vertexColors } );
+						const material = new THREE.PointsMaterial( { size: 0.1, vertexColors: vertexColors, color: colorhex});
 
 						points = new THREE.Points( geometry, material );
 						scene.add( points );
