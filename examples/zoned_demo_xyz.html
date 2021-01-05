@@ -23,8 +23,10 @@
 			let camera, controls, scene, renderer, clock;
 
 			let points;
-			let frames=60;
-			let colorhex=0xf09729 ;
+			let start_frame = 50;
+			let end_frame = 61;
+			let display_frames= end_frame - 1;
+			let colorhex=0xf09729;
 			let oldpoints;
 			init();
 			animate();
@@ -32,62 +34,32 @@
 			function init() {
 
 				camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
-				// camera.position.set( 10, 7, 10 );
-				camera.position.z = 100;
+				camera.position.set( 11, -85, 180 );
+				// camera.position.z = 100;
 				scene = new THREE.Scene();
-				// scene.background = new THREE.Color( 0xcccccc );
 				scene.add( camera );
 				camera.lookAt( scene.position );
-
 				clock = new THREE.Clock();
-				const loader = new XYZLoader();
-				// Load all frames
-				loader.load( 'models/xyz/PCL_frame_' + frames + 'fixed_div_by_50_YZflip.xyz', function ( geometry ) {
-				geometry.center();
 
-				const vertexColors = ( geometry.hasAttribute( 'color' ) === true );
-
-				const material = new THREE.PointsMaterial( { size: 0.1, vertexColors: false, color: colorhex });
-
-				points = new THREE.Points( geometry, material );
-				points.name=frames;
-				scene.add( points );
-				});
+				// Load all frames and keep them invisible except the displayed frame
+				var iframe;
+				let loader = new XYZLoader();
+				for (iframe = start_frame; iframe < end_frame; iframe++) {
+					synchronized_load(loader, iframe);
+				}
+				// Initialize WebGL
 				renderer = new THREE.WebGLRenderer();
 				renderer.setPixelRatio( window.devicePixelRatio );
 				renderer.setSize( window.innerWidth, window.innerHeight );
 				document.body.appendChild( renderer.domElement );
 
-				//
-
 				window.addEventListener( 'resize', onWindowResize, false );
-
 				// Controls
 				controls = new OrbitControls( camera, renderer.domElement );
 				controls.enableDamping = true; // an animation loop is required when either damping or auto-rotation are enabled
 				controls.dampingFactor = 0.1;
-				// controls.enableZoom = true;
-
-				// controls.screenSpacePanning = false;
-				// controls.minDistance = 100;
-				// controls.maxDistance = 500;
-/* 				controls.minDistance = 100;
-				controls.maxDistance = 500;
-
-				controls.maxPolarAngle = Math.PI / 2; */
 
 				// Lights
-/* 				const dirLight1 = new THREE.DirectionalLight( 0xffffff );
-				dirLight1.position.set( 1, 1, 1 );
-				scene.add( dirLight1 );
-
-				const dirLight2 = new THREE.DirectionalLight( 0x002288 );
-				dirLight2.position.set( - 1, - 1, - 1 );
-				scene.add( dirLight2 );
-
-				const ambientLight = new THREE.AmbientLight( 0x222222 );
-				scene.add( ambientLight ); */
-
 				var keyLight = new THREE.DirectionalLight(new THREE.Color('hsl(30, 100%, 75%)'), 1.0);
 				keyLight.position.set(-100, 0, 100);
 
@@ -101,56 +73,38 @@
 				scene.add(fillLight);
 				scene.add(backLight);
 
+				// Event Listerner for key press
 				document.addEventListener("keypress", function(pressed){
 
 					if (pressed.key == "n"){
-						oldpoints = scene.getObjectByName( frames );
-						frames+=1;
-						points = scene.getObjectByName( frames );
+						oldpoints = scene.getObjectByName( display_frames );
+						display_frames++;
+						points = scene.getObjectByName( display_frames );
 						points.visible=true;
-						olpoints.visible=false;
-						console.log(frames)
+						oldpoints.visible=false;
+						console.log("frame: " + display_frames)
 						return;
 					} else if (pressed.key == "p"){
-						oldpoints = scene.getObjectByName( frames );
-						frames-=1;
-						points = scene.getObjectByName( frames );
+						oldpoints = scene.getObjectByName( display_frames );
+						display_frames--;
+						points = scene.getObjectByName( display_frames );
 						points.visible=true;
-						olpoints.visible=false;
-						console.log(frames)
+						oldpoints.visible=false;
+						console.log("frame: " + display_frames)
 						return;
 					} else if (pressed.key == "h"){
-						points = scene.getObjectByName( frames );
+						points = scene.getObjectByName( display_frames );
 						points.visible=false;
 						return;
 					} else if (pressed.key == "u"){
-						points = scene.getObjectByName( frames );
+						points = scene.getObjectByName( display_frames );
 						points.visible=true;
 						return;
-					} else if (pressed.key == "c"){
-						points = scene.getObjectByName( 'models/xyz/PCL_frame_' + frames + 'fixed_div_by_50_YZflip.xyz');
-						points.visible=false;
-						return;
+					} else if (pressed.key == "l"){
+						console.log(camera.position)
 					} else{
 						return;
 					}
-
-					// Clean up and re-adding the light
-					scene.remove.apply(scene, scene.children);
-					// scene.add(keyLight);
-					// scene.add(fillLight);
-					// scene.add(backLight);
-					loader.load( 'models/xyz/PCL_frame_' + frames + 'fixed_div_by_50_YZflip.xyz', function ( geometry ) {
-
-						geometry.center();
-						const vertexColors = ( geometry.hasAttribute( 'color' ) === true );
-
-						const material = new THREE.PointsMaterial( { size: 0.1, vertexColors: vertexColors, color: colorhex});
-
-						points = new THREE.Points( geometry, material );
-						scene.add( points );
-						console.log(frames)
-					} );
 				});
 			}
 
@@ -172,7 +126,24 @@
 				renderer.render( scene, camera );
 
 			}
-	
+
+			function xyz_load(loader, iframe, iframe2) {
+				loader.load( 'models/xyz/PCL_frame_' + iframe + 'fixed_div_by_50_YZflip.xyz', function ( geometry ) {
+					geometry.center();
+					const vertexColors = ( geometry.hasAttribute( 'color' ) === true );
+					const material = new THREE.PointsMaterial( { size: 0.1, vertexColors: false, color: colorhex });
+					points = new THREE.Points( geometry, material );
+					points.name=iframe;
+					scene.add( points );
+					if (iframe == display_frames){
+						return;
+					}
+					points.visible=false;
+					} );
+			}
+			async function synchronized_load(loader, iframe, iframe2){
+				var x = await xyz_load(loader, iframe, iframe2);
+			}
 		</script>
 
 	</body>
